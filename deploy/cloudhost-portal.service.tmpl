@@ -1,0 +1,45 @@
+# 个人云主机门户（设计文档 10 / F6）
+[Unit]
+Description=Quectel Pi M2 CloudHost Portal
+Documentation=file:///opt/cloudhost/README.md
+After=network-online.target
+Wants=network-online.target
+# 门户是文件与终端鉴权的上游，必须先就绪
+Before=cloudhost-files.service cloudhost-ttyd.service
+
+[Service]
+Type=simple
+User={{RUN_USER}}
+Group={{RUN_USER}}
+WorkingDirectory=/opt/cloudhost/portal
+Environment=CLOUDHOST_CONFIG=/etc/cloudhost/config.yaml
+Environment=CLOUDHOST_LOG_LEVEL=info
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/cloudhost/venv/bin/python -m app.main
+Restart=on-failure
+RestartSec=3
+StartLimitBurst=5
+# 文档 16.1：portal 常驻内存 ≤ 150MB
+MemoryMax=150M
+TasksMax=256
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/log/cloudhost /var/lib/cloudhost {{CLOUD_ROOT}} {{FILES_ROOT}}
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+# 健康检查：GET /api/healthz 返回 200 视为就绪（文档 10.2）
+# 30 秒内探不通必须返回非零，否则 systemd 会把「进程秒退 + 无监听」误判为启动成功，
+# 掩盖启动逻辑本身的 bug（曾因为没有 __main__ 入口导致进程 status=0 立即退出）。
+ExecStartPost=/bin/sh -c 'for i in $(seq 1 30); do curl -fsS http://127.0.0.1:{{PORTAL_PORT}}/api/healthz >/dev/null 2>&1 && exit 0; sleep 1; done; echo "portal healthz timeout" >&2; exit 1'
+
+[Install]
+WantedBy=multi-user.target

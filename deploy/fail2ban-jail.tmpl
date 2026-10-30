@@ -1,0 +1,13 @@
+# fail2ban jail：门户登录防爆破（设计文档 11.1 / A4）
+# 由 install.sh 渲染到 /etc/fail2ban/jail.d/cloudhost.conf
+[cloudhost]
+enabled  = true
+port     = http,https
+filter   = cloudhost-caddy
+logpath  = /var/log/cloudhost/caddy-access.log
+maxretry = {{LOGIN_MAX_ATTEMPTS}}
+findtime = {{LOGIN_WINDOW_SEC}}
+bantime  = {{FAIL2BAN_BANTIME}}
+# 只封 IPv4/IPv6 单地址，不动内网回环
+ignoreip = 127.0.0.1/8 ::1
+backend  = auto

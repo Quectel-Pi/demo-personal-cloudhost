@@ -1,0 +1,10 @@
+/var/log/cloudhost-peanut/*.log {
+    weekly
+    rotate 4
+    size 10M
+    missingok
+    notifempty
+    compress
+    copytruncate
+    su cloudhost-peanut cloudhost-peanut
+}

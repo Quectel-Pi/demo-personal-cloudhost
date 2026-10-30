@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Pi M2 text brand</title>
+  <style>
+    #bento:target ~ rect { fill: #151719; stroke: #f5b544; }
+    #bento:target ~ text { fill: #f4f3ef; }
+    #swiss:target ~ rect { fill: #f5f6f8; stroke: #2457d6; }
+    #swiss:target ~ text { fill: #18212b; }
+    #cyber:target ~ rect { fill: #080b12; stroke: #52e5ff; }
+    #cyber:target ~ text { fill: #edf4ff; }
+  </style>
+  <g id="bento"/>
+  <g id="swiss"/>
+  <g id="cyber"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#071426" stroke="#66d9ef" stroke-width="2"/>
+  <text x="32" y="40" text-anchor="middle" fill="#edf5fc" font-family="sans-serif" font-size="25" font-weight="700">M2</text>
+</svg>

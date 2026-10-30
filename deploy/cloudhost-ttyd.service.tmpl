@@ -1,0 +1,40 @@
+# ttyd Web 终端（P1 / E1，设计文档 4.2 / 5.3）
+# baseurl=/term，只监听 127.0.0.1，鉴权由 Caddy forward_auth 统一完成。
+[Unit]
+Description=CloudHost Web Terminal (ttyd, 127.0.0.1)
+After=network-online.target cloudhost-portal.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{RUN_USER}}
+Group={{RUN_USER}}
+WorkingDirectory={{FILES_ROOT}}
+Environment=TERM=xterm-256color
+ExecStart=/opt/cloudhost/bin/ttyd \
+	--interface 127.0.0.1 \
+	--port {{TTYD_PORT}} \
+	--base-path /term \
+	--writable \
+	--max-clients 4 \
+	--client-option disableLeaveAlert=true \
+	--client-option fontSize=16 \
+	--client-option 'fontFamily=ui-monospace,Consolas,Liberation Mono,Menlo,monospace' \
+	--client-option lineHeight=1.25 \
+	--client-option cursorStyle=bar \
+	--client-option cursorBlink=false \
+	--client-option scrollback=5000 \
+	--client-option 'titleFixed=Pi M2 · Local browser shell (not SSH)' \
+	--client-option 'theme={"background":"#071426","foreground":"#edf5fc","cursor":"#66d9ef","cursorAccent":"#071426","selectionBackground":"#39536c","black":"#a6b8cb","red":"#ff8b88","green":"#34d399","yellow":"#f0b429","blue":"#91b5ff","magenta":"#ddb3ff","cyan":"#66d9ef","white":"#edf5fc","brightBlack":"#b9c9d9","brightRed":"#ffb4b1","brightGreen":"#7ee5bb","brightYellow":"#f9d681","brightBlue":"#bdd2ff","brightMagenta":"#ebd3ff","brightCyan":"#a2e9f6","brightWhite":"#ffffff"}' \
+	/bin/bash -l
+Restart=on-failure
+RestartSec=3
+StartLimitBurst=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths={{FILES_ROOT}} /var/log/cloudhost
+
+[Install]
+WantedBy=multi-user.target

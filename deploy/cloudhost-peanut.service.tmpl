@@ -1,0 +1,33 @@
+[Unit]
+Description=CloudHost PHTunnel SDK (explicit controller start only)
+After=network-online.target cloudhost-remote-gateway.service
+Wants=network-online.target
+Requires=cloudhost-remote-gateway.service
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=cloudhost-peanut
+Group=cloudhost-peanut
+WorkingDirectory=/var/lib/cloudhost-peanut/sdk
+Environment=PYTHONPATH=/opt/cloudhost/portal
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/cloudhost/venv/bin/python -m app.peanut_launch
+UMask=0077
+Restart=on-failure
+RestartPreventExitStatus=78
+RestartSec=5
+TimeoutStopSec=10
+KillMode=control-group
+MemoryMax=128M
+TasksMax=64
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/cloudhost-peanut/sdk /var/log/cloudhost-peanut
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+StandardOutput=append:/var/log/cloudhost-peanut/stdout.log
+StandardError=append:/var/log/cloudhost-peanut/stderr.log

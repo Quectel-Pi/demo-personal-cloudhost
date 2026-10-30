@@ -1,0 +1,7 @@
+.web-verification/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.web-verification/
+peanut-app.local.json

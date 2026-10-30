@@ -1,0 +1,4 @@
+# 开发与验收用依赖（板端不需要）
+-r requirements.txt
+pytest>=8.0,<9.0
+httpx>=0.27,<0.29

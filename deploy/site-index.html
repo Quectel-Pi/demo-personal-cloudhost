@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" data-cloudhost-site>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title data-i18n="site.pageTitle">My site · Quectel Pi M2</title>
+  <script src="/static/theme-boot.js?ui=36"></script>
+  <script src="/static/i18n.js?ui=12"></script>
+  <style>
+    .i18n-pending body { visibility: hidden; }
+    :root {
+      color-scheme: dark;
+      --bg: #071426;
+      --panel: #10263e;
+      --border: #39536c;
+      --text: #edf5fc;
+      --muted: #a6b8cb;
+      --accent: #66d9ef;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    main {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: clamp(18px, 4vw, 40px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--panel);
+    }
+    .badge {
+      display: inline-block;
+      margin: 0 0 12px;
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    h1 { margin: 0 0 12px; font-size: 1.5rem; }
+    h2 { margin: 26px 0 8px; font-size: 1.05rem; }
+    p, li { color: var(--muted); }
+    code {
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(147, 164, 184, 0.16);
+      color: var(--accent);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.88em;
+    }
+    ol { padding-left: 22px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .foot { margin-top: 26px; padding-top: 16px; border-top: 1px dashed var(--border); }
+    .language-controls { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 14px; }
+    .language-controls button {
+      padding: 6px 10px;
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+    .language-controls button[aria-pressed="true"] { border-color: var(--accent); }
+    .language-status { color: var(--muted); font-size: 0.85rem; }
+    html { scroll-behavior: smooth; }
+    section { scroll-margin-top: 16px; margin-top: 32px; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.2; }
+    h2 { font-size: 1.6rem; }
+    h3 { margin-top: 0; }
+    nav, .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    nav { padding: 16px 0; border-block: 1px solid var(--border); margin-top: 24px; }
+    nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 10px; border-radius: 8px; }
+    .site-hero { max-width: 900px; padding: 24px 0 12px; }
+    .site-hero h1 { font-size: clamp(32px, 4vw, 56px); }
+    .site-hero p { font-size: 18px; }
+    #about { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+    #about h2 { grid-column: 1 / -1; }
+    #publish { background: var(--bg); padding: 24px; border-radius: 16px; }
+    #publish li { padding: 8px 0 8px 8px; }
+    #downloads { border-top: 1px solid var(--border); padding-top: 8px; }
+    .cards, .workspace { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .workspace { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card, .preview { padding: 20px; border: 1px solid var(--border); border-radius: 12px; min-width: 0; }
+    .card { display: block; }
+    a.card:hover { border-color: var(--accent); text-decoration: none; }
+    .card p { margin-bottom: 0; }
+    .workspace label { display: block; margin-bottom: 8px; }
+    textarea {
+      display: block; width: 100%; min-height: 360px; resize: vertical;
+      padding: 16px; border: 1px solid var(--border); border-radius: 12px;
+      background: var(--bg); color: var(--text); font: 0.9rem/1.6 ui-monospace, monospace;
+    }
+    .preview { min-height: 360px; overflow-wrap: anywhere; }
+    .preview h1 { font-size: 1.6rem; }
+    .preview h2, .preview h3 { margin-top: 16px; }
+    .preview pre { overflow: auto; padding: 12px; background: var(--bg); border-radius: 8px; }
+    .preview pre code { padding: 0; background: none; }
+    .preview blockquote { margin-left: 0; padding-left: 16px; border-left: 3px solid var(--accent); }
+    button.action {
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); font: inherit; cursor: pointer;
+      min-height: 44px; min-width: 44px;
+    }
+    button:hover { border-color: var(--accent); }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+    .foot a { display: inline-flex; min-height: 44px; align-items: center; }
+    .note { font-size: 0.9rem; }
+    @media (max-width: 700px) {
+      .cards, .workspace { grid-template-columns: 1fr; }
+      #about { grid-template-columns: 1fr; }
+      main { padding: 20px; }
+      body { padding: 12px; }
+      #publish { padding: 18px; }
+      textarea, .preview { min-height: 260px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+  <link rel="stylesheet" href="/static/themes.css?ui=37" />
+</head>
+<body>
+  <main>
+    <p class="language-status" data-i18n-status role="status" aria-live="polite" hidden></p>
+    <header class="site-hero">
+    <p class="badge" data-i18n="site.brand">Quectel Pi M2 · Personal Cloud</p>
+    <h1 data-i18n="site.heroTitle">A small board. Your own corner of the web.</h1>
+    <p data-i18n="site.heroText">A personal project showcase hosted on Quectel Pi M2. Explore a website, try a browser-only app, then publish your own page.</p>
+    <p class="note" data-i18n="site.transport">Transport depends on the entry you use. Check the browser address bar; this static page does not verify public access.</p>
+    </header>
+    <nav aria-label="Site sections" data-i18n-aria-label="site.navigation">
+      <a href="#about" data-i18n="site.aboutTitle">About this host</a>
+      <a href="#projects" data-i18n="site.projectsTitle">Project showcase</a>
+      <a href="#markdown" data-i18n="site.markdownTitle">Markdown playground</a>
+      <a href="#publish" data-i18n="site.publishTitle">Publish your own page</a>
+      <a href="#downloads" data-i18n="site.downloadsTitle">Sample downloads</a>
+    </nav>
+
+    <section id="about" aria-labelledby="about-title">
+      <h2 id="about-title" data-i18n="site.aboutTitle">About this host</h2>
+      <p data-i18n="site.aboutText">Quectel Pi M2 / RK3576 / Debian 13 is the target platform. Caddy serves this static site at /site/. This is a platform introduction, not live device telemetry.</p>
+      <p class="note" data-i18n="site.boundary">The portal handles status, files and terminal access. This site demonstrates personal pages, documentation and static apps, without a new backend or an internet connection.</p>
+    </section>
+
+    <section id="projects" aria-labelledby="projects-title">
+      <h2 id="projects-title" data-i18n="site.projectsTitle">Project showcase</h2>
+      <div class="cards">
+        <a class="card" href="#about"><h3 data-i18n="site.profileCard">Personal homepage</h3><p data-i18n="site.profileText">Introduce your board and projects with a page you control.</p></a>
+        <a class="card" href="#markdown"><h3 data-i18n="site.appCard">A browser-only app</h3><p data-i18n="site.appText">Edit Markdown and see a safe preview immediately.</p></a>
+        <a class="card" href="#publish"><h3 data-i18n="site.guideCard">A publishing notebook</h3><p data-i18n="site.guideText">Follow a real file-to-website workflow on your board.</p></a>
+      </div>
+    </section>
+
+    <section id="markdown" aria-labelledby="markdown-title">
+      <h2 id="markdown-title" data-i18n="site.markdownTitle">Markdown playground</h2>
+      <p id="markdown-help" class="note" data-i18n="site.markdownHelp">Supports headings, paragraphs, lists, quotes, fenced code and links. Raw HTML is displayed as text. This is a basic demo, not a full Markdown implementation. Input stays in this page and is not saved or sent to the server.</p>
+      <div class="workspace">
+        <div>
+          <label for="markdown-input" data-i18n="site.editor">Markdown source</label>
+          <textarea id="markdown-input" aria-describedby="markdown-help" spellcheck="false"></textarea>
+        </div>
+        <div>
+          <span id="preview-label" data-i18n="site.preview">Live preview</span>
+          <div class="preview" id="markdown-preview" role="region" aria-labelledby="preview-label"></div>
+        </div>
+      </div>
+      <p><button class="action" id="reset-example" type="button" data-i18n="site.reset">Restore example</button></p>
+    </section>
+
+    <section id="publish" aria-labelledby="publish-title">
+      <h2 id="publish-title" data-i18n="site.publishTitle">Publish your own page</h2>
+      <ol>
+        <li data-i18n="site.publishLocate">Open Files from the portal or connect over SSH. Find your configured site_dir; the default is ~/cloud/www (under cloud/www when Files opens your home directory).</li>
+        <li data-i18n="site.publishBackup">Back up index.html outside the public site directory. Edit its heading, or replace it with your own HTML; keep CSS, JS and images in the site directory using relative links.</li>
+        <li data-i18n="site.publishRefresh">Save the file and refresh /site/ to show the change. No service restart is required. If necessary, bypass the browser cache.</li>
+      </ol>
+      <p class="note" data-i18n="site.publishSafety">Deployment installs the current demo homepage by default. A different existing index.html is backed up under /var/backups/cloudhost-site before replacement; other site files are kept. Use --keep-site when reinstalling to retain your custom homepage. Public sites must not contain secrets.</p>
+    </section>
+
+    <section id="downloads" aria-labelledby="downloads-title">
+      <h2 id="downloads-title" data-i18n="site.downloadsTitle">Sample downloads</h2>
+      <p data-i18n="site.downloadHelp">Download the project introduction or a preset Markdown example in the current language. These UTF-8 files are generated in your browser, not fetched from the file service. Your editor contents are not included.</p>
+      <div class="actions">
+        <button class="action" type="button" data-download="intro" data-i18n="site.downloadIntro">Download introduction (.txt)</button>
+        <button class="action" type="button" data-download="markdown" data-i18n="site.downloadMarkdown">Download example (.md)</button>
+      </div>
+      <p id="download-status" role="status" aria-live="polite"></p>
+    </section>
+    <noscript><p>JavaScript is required for the Markdown preview and downloads. / Markdown 预览与下载需要启用 JavaScript。</p></noscript>
+    <p class="foot"><a href="/" target="_top" data-i18n="site.backPortal">Back to the Personal Cloud portal</a></p>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+
+      var i18n = window.CloudhostI18n;
+      var input = document.getElementById("markdown-input");
+      var preview = document.getElementById("markdown-preview");
+      var downloadStatus = document.getElementById("download-status");
+      var downloadMessage = null;
+
+      function appendInline(parent, text) {
+        var links = /\[([^\]\n]+)\]\(([^()\s]+)\)/g;
+        var match;
+        var offset = 0;
+        while ((match = links.exec(text)) !== null) {
+          parent.appendChild(document.createTextNode(text.slice(offset, match.index)));
+          var url = null;
+          try {
+            url = new URL(match[2], window.location.href);
+          } catch (error) {
+            if (!(error instanceof TypeError)) { throw error; }
+            console.warn("Cloudhost Markdown link is malformed; displaying it as text.");
+          }
+          if (url && /^https?:$/.test(url.protocol) && !/^[/\\]{2}/.test(match[2])) {
+            var anchor = document.createElement("a");
+            anchor.textContent = match[1];
+            anchor.href = url.href;
+            parent.appendChild(anchor);
+          } else {
+            parent.appendChild(document.createTextNode(match[0]));
+          }
+          offset = links.lastIndex;
+        }
+        parent.appendChild(document.createTextNode(text.slice(offset)));
+      }
+
+      function renderMarkdown() {
+        preview.replaceChildren();
+        if (!input.value.trim()) {
+          preview.textContent = i18n.t("site.empty");
+          return;
+        }
+        var lines = input.value.replace(/\r\n?/g, "\n").split("\n");
+        var codeLines = null;
+        var list = null;
+        var paragraph = null;
+        lines.forEach(function (line) {
+          if (/^```/.test(line)) {
+            list = null;
+            paragraph = null;
+            if (codeLines !== null) {
+              appendCode();
+            } else {
+              codeLines = [];
+            }
+            return;
+          }
+          if (codeLines !== null) { codeLines.push(line); return; }
+          if (!line.trim()) { list = null; paragraph = null; return; }
+          var heading = /^(#{1,6})\s+(.+)$/.exec(line);
+          var item = /^\s*(?:[-*+]|\d+\.)\s+(.+)$/.exec(line);
+          var quote = /^>\s?(.*)$/.exec(line);
+          var node;
+          if (item) {
+            var listTag = /^\s*\d+\./.test(line) ? "ol" : "ul";
+            if (!list || list.localName !== listTag) {
+              list = document.createElement(listTag);
+              preview.appendChild(list);
+            }
+            paragraph = null;
+            node = document.createElement("li");
+            list.appendChild(node);
+            appendInline(node, item[1]);
+          } else {
+            list = null;
+            if (heading || quote) {
+              paragraph = null;
+              node = document.createElement(heading ? "h" + heading[1].length : "blockquote");
+              preview.appendChild(node);
+              appendInline(node, heading ? heading[2] : quote[1]);
+            } else {
+              if (!paragraph) {
+                paragraph = document.createElement("p");
+                preview.appendChild(paragraph);
+              } else {
+                paragraph.appendChild(document.createTextNode(" "));
+              }
+              appendInline(paragraph, line);
+            }
+          }
+        });
+        if (codeLines !== null) { appendCode(); }
+
+        function appendCode() {
+          var pre = document.createElement("pre");
+          var code = document.createElement("code");
+          code.textContent = codeLines.join("\n");
+          pre.appendChild(code);
+          preview.appendChild(pre);
+          codeLines = null;
+        }
+      }
+
+      function resetExample() {
+        input.value = i18n.t("site.example");
+        renderMarkdown();
+      }
+
+      function updateDownloadStatus() {
+        downloadStatus.textContent = downloadMessage ? i18n.t(downloadMessage) : "";
+      }
+
+      function download(kind) {
+        var objectUrl;
+        var anchor;
+        try {
+          var introduction = [
+            i18n.t("site.brand"), i18n.t("site.aboutText"), i18n.t("site.boundary"),
+            i18n.t("site.publishLocate"), i18n.t("site.publishBackup"),
+            i18n.t("site.publishRefresh"), i18n.t("site.downloadHelp")
+          ].join("\n\n") + "\n";
+          var content = kind === "intro" ? introduction : i18n.t("site.example") + "\n";
+          objectUrl = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+          anchor = document.createElement("a");
+          anchor.href = objectUrl;
+          anchor.download = kind === "intro" ? "pi-m2-introduction.txt" : "pi-m2-example.md";
+          document.body.appendChild(anchor);
+          anchor.click();
+          downloadMessage = "site.downloadStarted";
+        } catch (error) {
+          console.error("Cloudhost sample download failed:", error);
+          downloadMessage = "site.downloadFailed";
+        } finally {
+          if (anchor) { anchor.remove(); }
+          if (objectUrl) { window.setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000); }
+          updateDownloadStatus();
+        }
+      }
+
+      input.addEventListener("input", renderMarkdown);
+      document.getElementById("reset-example").addEventListener("click", resetExample);
+      document.querySelectorAll("[data-download]").forEach(function (button) {
+        button.addEventListener("click", function () { download(button.dataset.download); });
+      });
+      window.addEventListener("cloudhost:languagechange", function () {
+        renderMarkdown();
+        updateDownloadStatus();
+      });
+      resetExample();
+    })();
+  </script>
+</body>
+</html>
