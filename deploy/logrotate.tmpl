@@ -1,0 +1,17 @@
+# 个人云主机日志轮转（设计文档第 7 章：每日轮转，保留 7 天）
+# 由 install.sh 安装到 /etc/logrotate.d/cloudhost
+/var/log/cloudhost/*.log {
+	daily
+	rotate 7
+	missingok
+	notifempty
+	compress
+	delaycompress
+	copytruncate
+	create 0640 root adm
+	sharedscripts
+	postrotate
+		# fail2ban 使用 auto backend，无需重载即可重新打开文件
+		systemctl reload caddy >/dev/null 2>&1 || true
+	endscript
+}

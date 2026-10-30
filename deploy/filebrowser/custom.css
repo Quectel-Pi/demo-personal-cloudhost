@@ -1,0 +1,77 @@
+/* File Browser v2.31.2 official branding.files/custom.css extension.
+   The portal maps its theme onto these variables without replacing the client. */
+:root, :root.dark {
+  color-scheme: dark;
+  --background: #071426;
+  --surfacePrimary: #10263e;
+  --surfaceSecondary: #152e48;
+  --textPrimary: #a6b8cb;
+  --textSecondary: #edf5fc;
+  --blue: #66d9ef;
+  --dark-blue: #66d9ef;
+  --red: #ff8b88;
+  --dark-red: #ff8b88;
+  --moon-grey: #152e48;
+  --action: #edf5fc;
+  --iconPrimary: #66d9ef;
+  --iconSecondary: #071426;
+  --iconTertiary: #a6b8cb;
+  --item-selected: #071426;
+  --hover: #24445f;
+  --divider: #39536c;
+  --borderPrimary: #39536c;
+  --borderSecondary: #a6b8cb;
+  --dividerPrimary: #39536c;
+  --dividerSecondary: #39536c;
+  --input-red: #663a45;
+  --input-green: #18574d;
+}
+body { font-family: system-ui, "Noto Sans SC", sans-serif; }
+header, nav, .breadcrumbs, .card, .prompt, #listing .item {
+  border-color: var(--borderPrimary);
+}
+.card, .prompt, #listing.mosaic .item { border-radius: 12px; }
+.button { background: var(--blue); color: var(--iconSecondary); border-radius: 8px; }
+.button--red { background: var(--red); }
+.button--flat { background: transparent; color: var(--blue); }
+.button--flat.button--red { color: var(--red); }
+.button--flat.button--grey { color: var(--textPrimary); }
+.button:hover { background: var(--blue); color: var(--iconSecondary); }
+.button--flat:hover { background: var(--surfaceSecondary); color: var(--textSecondary); }
+.button, button.action, a.action, input:not([type="checkbox"]):not([type="radio"]), select {
+  min-height: 44px;
+}
+button.action, a.action { min-width: 44px; }
+.input { color: var(--textSecondary); background: var(--background); border-color: var(--borderPrimary); }
+#listing .item[aria-selected="true"] { outline: 2px solid var(--textSecondary); outline-offset: -3px; }
+#listing .item[aria-selected="true"] * { color: var(--iconSecondary); }
+.progress div { background: var(--blue); }
+/* The capacity component writes inline colors, so these overrides are required. */
+.credits .vue-simple-progress { background: var(--surfaceSecondary) !important; }
+.credits .vue-simple-progress-bar { background: var(--blue) !important; }
+.credits { color: var(--textPrimary); }
+/* Preserve the portal's simplified navigation using the official CSS hook.
+   This is presentation only, never an authorization mechanism. */
+nav a[href$="/settings"], nav a[href*="/settings/"],
+nav [aria-label="Settings"] { display: none; }
+.message { color: var(--textPrimary); font-size: 1.4em; }
+/* The official CSS hook also covers the embedded Ace editor. These styles
+   do not change Ace's hard-coded external loader (see verification blocker). */
+#editor.ace_editor {
+  background: var(--background) !important;
+  color: var(--textSecondary) !important;
+  font: 16px/1.5 ui-monospace, Consolas, monospace !important;
+}
+#editor .ace_gutter { background: var(--surfacePrimary) !important; color: var(--textPrimary) !important; }
+#editor .ace_cursor { color: var(--blue) !important; }
+#editor .ace_marker-layer .ace_active-line,
+#editor .ace_gutter-active-line { background: var(--surfaceSecondary) !important; }
+#editor .ace_marker-layer .ace_selection { background: var(--dividerPrimary) !important; }
+#editor .ace_comment { color: var(--textPrimary) !important; }
+#editor .ace_keyword { color: var(--blue) !important; }
+#editor .ace_string { color: var(--icon-green, #7ee5bb) !important; }
+#editor .ace_constant { color: var(--icon-violet, #ddb3ff) !important; }
+html body *:focus-visible { outline: 3px solid var(--blue) !important; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

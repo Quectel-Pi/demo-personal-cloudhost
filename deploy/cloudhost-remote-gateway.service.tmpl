@@ -1,0 +1,21 @@
+[Unit]
+Description=CloudHost loopback public Web gateway
+After=network-online.target cloudhost-portal.service
+
+[Service]
+Type=simple
+User=root
+SupplementaryGroups=caddy
+WorkingDirectory=/opt/cloudhost
+ExecStart={{CADDY_BIN}} run --config /etc/cloudhost-peanut/Caddyfile --adapter caddyfile
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+CapabilityBoundingSet=
+ReadWritePaths=/var/log/cloudhost
+MemoryMax=128M
+TasksMax=256

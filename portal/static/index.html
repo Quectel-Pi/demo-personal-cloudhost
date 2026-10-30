@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="csrf-token" content="{{CSRF}}" />
+  <title>Personal Cloud · Pi M2</title>
+  <script src="/static/theme-boot.js?v={{VERSION}}&amp;ui=36"></script>
+  <script src="/static/i18n.js?v={{VERSION}}&amp;ui=39"></script>
+  <link rel="stylesheet" href="/static/styles.css?v={{VERSION}}&amp;ui=39" />
+  <link rel="stylesheet" href="/static/themes.css?v={{VERSION}}&amp;ui=37" />
+  <script src="/static/theme.js?v={{VERSION}}&amp;ui=38" defer></script>
+</head>
+<body class="portal-body">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">M2</span>
+      <div>
+        <h1 data-i18n="dashboard.brand">Personal Cloud</h1>
+        <p class="brand-sub">Quectel Pi M2 · v{{VERSION}} · {{LOGIN_USER}}</p>
+      </div>
+    </div>
+    <button class="btn btn-ghost nav-toggle" id="nav-toggle" type="button" aria-controls="main-nav" aria-expanded="false" data-i18n="workbench.menu">Menu</button>
+    <nav class="topnav" id="main-nav" aria-label="Main navigation" data-i18n-aria-label="dashboard.navLabel">
+      <a class="btn btn-ghost nav-tab is-active" href="#overview" data-view="overview" data-i18n="dashboard.overview">Overview</a>
+      <a class="btn btn-ghost nav-tab" href="#files" data-view="files" data-i18n="dashboard.files">Files</a>
+      <a class="btn btn-ghost nav-tab" href="#site" data-view="site" data-i18n="dashboard.site">Site</a>
+      <a class="btn btn-ghost nav-tab" href="#remote" data-view="remote" data-i18n="remote.title">Remote</a>
+      <a class="btn btn-ghost nav-tab" href="#ssh" data-view="ssh" data-i18n="dashboard.ssh">SSH</a>
+      <a class="btn btn-ghost nav-tab" href="#term" id="term-tab" data-view="term" data-i18n="dashboard.terminal" hidden>Terminal</a>
+    </nav>
+    <div class="theme-control" data-theme-control>
+      <button class="btn btn-outline theme-toggle" id="theme-toggle" type="button" aria-controls="theme-panel" aria-expanded="false" hidden>Theme</button>
+    </div>
+    <div class="account-tools">
+      <button class="btn btn-outline" id="tools-toggle" type="button" aria-controls="account-menu" aria-expanded="false" data-i18n="workbench.account">Account</button>
+      <div class="account-menu" id="account-menu" hidden>
+      <p class="muted">{{LOGIN_USER}}</p>
+      <div class="language-controls" role="group" aria-label="Language" data-i18n-aria-label="common.languageGroup">
+        <button class="btn btn-ghost btn-sm" type="button" data-language="en"
+                data-i18n-aria-label="common.languageEnglish">EN</button>
+        <button class="btn btn-ghost btn-sm" type="button" data-language="zh"
+                data-i18n-aria-label="common.languageChinese">中文</button>
+      </div>
+      <button class="btn btn-outline" id="logout-btn" type="button" data-i18n="dashboard.logout">Sign out</button>
+      </div>
+    </div>
+  </header>
+  <p class="language-status" data-i18n-status role="status" aria-live="polite" hidden></p>
+  <p class="theme-status" data-theme-status role="status" aria-live="polite" data-i18n="theme.unavailable">Theme switching is unavailable. The basic page remains usable.</p>
+
+  <main class="layout" id="view-overview">
+    <section class="product-hero" aria-labelledby="product-title">
+      <div>
+        <h2 id="product-title" tabindex="-1" data-i18n="workbench.title">Pi M2 workspace</h2>
+        <p class="boundary" data-i18n="experience.boundary">LAN edition · HTTP only. Use a trusted local network; this connection is not encrypted.</p>
+      </div>
+    </section>
+    <section class="purpose-panel" aria-labelledby="purpose-title">
+      <h2 id="purpose-title" class="visually-hidden" data-i18n="dashboard.links">Quick links</h2>
+      <div class="link-grid purpose-grid">
+        <a class="link-card" href="#files" data-view="files">
+          <strong data-i18n="dashboard.filesCard">Files</strong>
+          <span data-i18n="dashboard.fileActions">Upload / download / preview / rename / delete</span>
+        </a>
+        <a class="link-card" id="overview-site-link" href="/site/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" data-i18n-aria-label="dashboard.siteCardNewTab">
+          <strong data-i18n="dashboard.siteCard">My site</strong>
+          <span data-i18n="dashboard.siteCardNewTab">Your pages and apps · opens in a new tab</span>
+        </a>
+        <a class="link-card" href="#term" id="term-card" data-view="term" hidden>
+          <strong data-i18n="dashboard.terminalCard">Web terminal</strong>
+          <span data-i18n="workbench.terminalHint">Local shell in your browser</span>
+        </a>
+        <a class="link-card" href="#ssh" id="shell-fallback" data-view="ssh" hidden>
+          <strong data-i18n="dashboard.sshCard">SSH access</strong>
+          <span data-i18n="experience.terminalOff">Web terminal is not installed or is disabled. Use SSH with your own key.</span>
+        </a>
+      </div>
+      <div class="peanut-actions overview-management-links">
+        <a class="btn btn-ghost" href="#remote" data-view="remote" data-i18n="remote.title">Remote</a>
+        <a class="btn btn-ghost" href="#ssh" data-view="ssh" data-i18n="dashboard.ssh">SSH</a>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="status-title">
+      <div class="panel-head">
+        <h2 id="status-title" data-i18n="dashboard.systemStatus">System status</h2>
+        <div class="meta">
+          <span id="status-time">—</span>
+          <span id="status-dot" class="dot" aria-hidden="true"></span>
+          <span id="status-hint" class="hint" data-i18n="dashboard.connecting">Connecting…</span>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <article class="metric">
+          <p class="metric-label" data-i18n="dashboard.cpu">CPU</p>
+          <p class="metric-value"><span id="cpu-percent">—</span><span class="unit">%</span></p>
+          <p class="metric-sub"><span data-i18n="dashboard.load">Load</span> <span id="cpu-load">—</span></p>
+          <div class="bar"><span id="cpu-bar"></span></div>
+        </article>
+
+        <article class="metric">
+          <p class="metric-label" data-i18n="dashboard.memory">Memory</p>
+          <p class="metric-value"><span id="mem-percent">—</span><span class="unit">%</span></p>
+          <p class="metric-sub"><span id="mem-used">—</span> / <span id="mem-total">—</span> MB</p>
+          <div class="bar"><span id="mem-bar"></span></div>
+        </article>
+
+        <article class="metric">
+          <p class="metric-label" data-i18n="dashboard.temperature">Temperature</p>
+          <p class="metric-value"><span id="temp-value">—</span><span class="unit">°C</span></p>
+          <p class="metric-sub" data-i18n="dashboard.socTemperature">SoC temperature</p>
+          <div class="bar"><span id="temp-bar"></span></div>
+        </article>
+
+        <article class="metric">
+          <p class="metric-label" data-i18n="dashboard.disk">Disk</p>
+          <p class="metric-value"><span id="disk-percent">—</span><span class="unit">%</span></p>
+          <p class="metric-sub"><span id="disk-used">—</span> / <span id="disk-total">—</span> GB</p>
+          <div class="bar"><span id="disk-bar"></span></div>
+        </article>
+      </div>
+
+      <div class="submetrics">
+        <div><span class="k" data-i18n="dashboard.primaryInterface">Primary interface</span><span class="v" id="net-iface">—</span></div>
+        <div><span class="k" data-i18n="dashboard.download">Download</span><span class="v" id="net-rx">—</span></div>
+        <div><span class="k" data-i18n="dashboard.upload">Upload</span><span class="v" id="net-tx">—</span></div>
+        <div><span class="k" data-i18n="dashboard.uptime">Uptime</span><span class="v" id="uptime">—</span></div>
+      </div>
+    </section>
+
+  </main>
+  <div class="layout detail-page" id="view-remote" hidden>
+    <section class="panel remote-panel" id="remote-status-panel" aria-labelledby="remote-title">
+      <div class="panel-head">
+        <h2 id="remote-title" tabindex="-1" data-i18n="remote.title">Remote access</h2>
+        <button class="btn btn-outline btn-sm" id="refresh-remote" type="button" data-i18n="remote.refresh">Refresh</button>
+      </div>
+      <div id="peanut-controls">
+        <p class="remote-progress" id="peanut-step" role="status"></p>
+        <p id="peanut-summary" role="status" data-i18n="dashboard.loading">Loading…</p>
+        <p class="hint" id="peanut-intent" role="status"></p>
+        <label class="remote-option" for="peanut-autostart">
+          <input type="checkbox" id="peanut-autostart" aria-describedby="peanut-autostart-help" disabled />
+          <span data-i18n="reset.autostart">Start remote access automatically at boot</span>
+        </label>
+        <p class="hint" id="peanut-autostart-help" data-i18n="reset.autostartHelp">Applies to the next boot. Existing mappings may resume. Changing this does not start or stop the current connection.</p>
+        <p id="peanut-next" class="hint"></p>
+        <div class="peanut-actions" id="peanut-primary-actions">
+          <button class="btn btn-primary" type="button" id="peanut-next-action" data-i18n="workbench.reviewSetup" disabled>Register public address</button>
+        </div>
+        <button class="btn btn-outline" type="button" id="peanut-management" data-i18n="peanut.management" disabled hidden>Configure mapping</button>
+        <p class="mono" id="peanut-public-address"></p>
+        <div class="peanut-actions" id="peanut-address-actions" hidden>
+          <button class="btn btn-outline" type="button" id="peanut-copy" data-i18n="peanut.copy" disabled>Copy address</button>
+          <a class="btn btn-outline" id="peanut-open" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" data-i18n="peanut.open" hidden>Open public portal</a>
+        </div>
+        <p id="peanut-feedback" class="hint" role="status" aria-live="polite"></p>
+        <button class="btn btn-outline" type="button" id="peanut-reconcile" data-i18n="reset.reconcile" hidden>Confirm pending request</button>
+        <button class="btn btn-outline" type="button" id="peanut-recover-reset" data-i18n="reset.recover" hidden>Recheck result / continue local cleanup</button>
+        <section id="peanut-binding-step" aria-labelledby="peanut-binding-title" hidden>
+          <h3 id="peanut-binding-title" data-i18n="peanut.binding">Account binding</h3>
+          <div class="peanut-actions">
+            <button class="btn btn-outline" type="button" id="peanut-qr-create" data-i18n="peanut.qrCreate" disabled hidden>Get official QR</button>
+            <button class="btn btn-outline" type="button" id="peanut-qr-refresh" data-i18n="peanut.qrRefresh" disabled hidden>Refresh QR</button>
+            <button class="btn btn-outline" type="button" id="peanut-qr-cancel" data-i18n="peanut.qrCancel" disabled hidden>Cancel local binding session</button>
+          </div>
+          <img id="peanut-qr-image" width="240" height="240" alt="Official account binding QR" data-i18n-alt="peanut.qrAlt" hidden />
+          <p id="peanut-qr-state" class="hint" role="status" aria-live="polite" tabindex="-1"></p>
+          <p class="hint" data-i18n="peanut.cancelHelp">Cancel only hides this QR and stops local polling. It cannot revoke an issued official QR or undo a completed scan.</p>
+        </section>
+        <details id="peanut-address-entry">
+          <summary data-i18n="flow.registerAddress">Configure public addresses</summary>
+          <form id="peanut-address-form" class="peanut-address-form" data-ssh-user="{{SSH_USER}}" data-ssh-host="{{PUBLIC_SSH_HOST_ATTR}}" data-ssh-port="{{PUBLIC_SSH_PORT}}">
+            <label for="peanut-address" data-i18n="peanut.addressLabel">Public HTTPS root address</label>
+            <input id="peanut-address" name="https_url" type="url" autocomplete="off" maxlength="2048" placeholder="https://" required />
+            <label for="peanut-ssh-address" data-i18n="peanut.sshAddress">Public SSH address (optional)</label>
+            <input id="peanut-ssh-address" name="ssh_address" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="259" placeholder="host:22" />
+            <button class="btn btn-outline" type="submit" data-i18n="peanut.save">Save address</button>
+          </form>
+        </details>
+        <details id="peanut-reset-options">
+          <summary data-i18n="reset.advanced">Advanced operations</summary>
+          <button class="btn btn-outline" type="button" id="peanut-reset-open" data-i18n="reset.open" disabled>Clear current configuration</button>
+        </details>
+        <dialog id="peanut-reset-dialog" aria-labelledby="peanut-reset-title" aria-describedby="peanut-reset-help peanut-reset-lan">
+          <form id="peanut-reset-form">
+            <h3 id="peanut-reset-title" data-i18n="reset.title">Clear remote access configuration</h3>
+            <p id="peanut-reset-help" data-i18n="reset.help">Remote access will stop, boot start will be disabled, and registered public addresses and verification results will be cleared. Files, application credentials and device identity are retained. Official cloud mappings are not deleted.</p>
+            <p id="peanut-reset-lan" data-i18n="reset.lan">Before continuing, keep your original LAN entry available. If this public connection drops, check the persistent task result from LAN; do not assume success or failure.</p>
+            <label class="remote-option"><input type="radio" name="reset_mode" value="reset_local_config" checked /><span data-i18n="reset.local">Clear local configuration (retain account binding; this does not allow an already bound device to scan again)</span></label>
+            <label class="remote-option"><input type="radio" name="reset_mode" id="peanut-reset-account" value="reset_account_config" aria-describedby="peanut-reset-gate" /><span data-i18n="reset.account">Unbind account and clear configuration (sign in again by QR)</span></label>
+            <p class="hint" id="peanut-reset-gate" role="status" aria-live="polite" data-i18n="reset.gate">Automatic unbinding has not been verified. Unbind in the official console, then refresh from LAN to confirm.</p>
+            <label class="remote-option"><input type="checkbox" id="peanut-reset-loss" required /><span data-i18n="reset.loss">I understand the remote connection may be lost and can access this device from LAN.</span></label>
+            <label class="remote-option" id="peanut-reset-account-confirm" hidden><input type="checkbox" id="peanut-reset-unbind" /><span data-i18n="reset.unbindConfirm">I understand this will unbind the current account.</span></label>
+            <div class="peanut-actions">
+              <button class="btn btn-outline" type="button" id="peanut-reset-cancel" data-i18n="reset.cancel">Cancel</button>
+              <button class="btn btn-primary" type="submit" id="peanut-reset-submit" data-i18n="reset.localAction">Clear local configuration</button>
+            </div>
+          </form>
+        </dialog>
+      </div>
+      <details class="remote-diagnostics">
+        <summary data-i18n="workbench.diagnostics">Connection details</summary>
+        <p class="hint" id="peanut-management-note" hidden></p>
+        <p class="hint" id="peanut-address-source" data-i18n="flow.addressSource" hidden>Registered by the user; not automatically synchronized.</p>
+        <p class="hint" id="remote-status-note" role="status" aria-live="polite" data-i18n="remote.noLiveProbe">
+          Runtime provider checks are not connected. Unknown does not mean online or ready.
+        </p>
+        <div class="submetrics remote-status-grid" data-i18n-aria-label="remote.statusLabel">
+          <div><span class="k" data-i18n="remote.provider">Configured provider</span><span class="v" id="remote-provider">—</span></div>
+          <div><span class="k" data-i18n="remote.intent">Enabled by configuration</span><span class="v" id="remote-enabled">—</span></div>
+          <div><span class="k" data-i18n="remote.connection">Connection</span><span class="v" id="remote-connection">—</span></div>
+          <div><span class="k" data-i18n="remote.https">HTTPS endpoint</span><span class="v" id="remote-https">—</span></div>
+          <div><span class="k" data-i18n="remote.reachability">External reachability</span><span class="v" id="remote-reachability">—</span></div>
+          <div><span class="k" data-i18n="remote.updated">Response generated</span><span class="v mono" id="remote-observed">—</span></div>
+        </div>
+        <p class="hint remote-stale" id="remote-stale" data-i18n="remote.stale" hidden>
+          Runtime status is unknown or stale. No live client probe has been verified.
+        </p>
+        <dl id="peanut-layers" class="peanut-layers"></dl>
+      </details>
+      <section class="remote-ssh" aria-labelledby="remote-ssh-title">
+        <h3 id="remote-ssh-title" tabindex="-1" data-i18n="ssh.title">SSH</h3>
+        <div class="remote-ssh-row">
+          <div>
+            <strong data-i18n="ssh.lanTitle">局域网</strong>
+            <code id="ssh-command">{{SSH_CMD}}</code>
+          </div>
+          <div class="ssh-actions">
+            <a class="btn btn-outline btn-sm" id="ssh-open" href="{{SSH_URI}}" data-i18n="dashboard.openSsh">打开 SSH</a>
+            <button class="btn btn-ghost btn-sm" type="button" id="ssh-copy"
+              data-copy="{{SSH_CMD}}" data-i18n="dashboard.copyCommand">复制命令</button>
+          </div>
+        </div>
+        <div class="remote-ssh-row">
+          <div>
+            <strong data-i18n="ssh.publicTitle">公网 SSH</strong>
+            <p class="hint" id="ssh-public-not-configured" data-i18n="ssh.publicNotConfigured" {{PUBLIC_SSH_STATUS_HIDDEN}}>未配置公网 SSH。</p>
+            <code id="ssh-public-command" {{PUBLIC_SSH_COMMAND_HIDDEN}}>{{PUBLIC_SSH_CMD}}</code>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" id="ssh-public-copy"
+            data-copy="{{PUBLIC_SSH_CMD_ATTR}}" data-i18n="dashboard.copyCommand" {{PUBLIC_SSH_COMMAND_HIDDEN}}>复制命令</button>
+        </div>
+      </section>
+    </section>
+
+  </div>
+  <div class="layout" id="overview-services">
+    <details class="panel">
+      <summary id="services-title" data-i18n="dashboard.services">Services</summary>
+      <div class="panel-head">
+        <button class="btn btn-outline btn-sm" id="refresh-services" type="button" data-i18n="dashboard.refresh">Refresh</button>
+      </div>
+      <div class="table-scroll" tabindex="0" data-i18n-aria-label="dashboard.services" aria-label="Services">
+      <table class="service-table">
+        <thead>
+          <tr>
+            <th data-i18n="dashboard.service">Service</th>
+            <th data-i18n="dashboard.state">State</th>
+            <th data-i18n="dashboard.enabledAtBoot">Enabled at boot</th>
+            <th data-i18n="dashboard.action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="service-rows">
+          <tr><td colspan="4" class="muted" data-i18n="dashboard.loading">Loading…</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="hint" id="service-hint" role="status" hidden></p>
+      <details>
+        <summary data-i18n="workbench.paths">Workspace locations</summary>
+        <p><span data-i18n="dashboard.files">Files</span>: <code>{{FILES_ROOT}}</code></p>
+        <p><span data-i18n="dashboard.site">Site</span>: <code>/site/</code></p>
+      </details>
+    </details>
+
+  </div>
+  <section class="workspace" id="view-embed" hidden aria-live="polite">
+    <div class="workspace-panel">
+      <div class="workspace-bar">
+        <h2 class="workspace-title visually-hidden" id="embed-title" tabindex="-1">Files</h2>
+        <div class="workspace-actions">
+          <span class="workspace-mode" id="site-preview-label" data-i18n="embed.sitePreview" hidden>Site preview</span>
+          <button class="btn btn-ghost btn-sm" id="embed-refresh" type="button">
+            <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 7v5h-5M20 12a8 8 0 1 0-2 5" />
+            </svg>
+            <span data-i18n="embed.reloadPage">Reload page</span>
+          </button>
+          <a class="btn btn-ghost btn-sm" id="site-open-tab" href="/site/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" data-i18n="embed.openSiteTab" hidden>Open in new tab</a>
+        </div>
+      </div>
+      <p class="hint embed-hint" id="embed-hint" role="status" hidden></p>
+      <iframe
+        id="embed-frame"
+        class="workspace-frame"
+        title="Embedded application"
+        data-i18n-title="embed.frameTitle"
+        src="about:blank"
+        referrerpolicy="same-origin"
+        allow="clipboard-read; clipboard-write"
+      ></iframe>
+      <iframe id="site-frame" class="workspace-frame" title="Site" src="about:blank" referrerpolicy="same-origin" allow="clipboard-read; clipboard-write" hidden></iframe>
+      <iframe id="term-frame" class="workspace-frame" title="Terminal" src="about:blank" referrerpolicy="same-origin" allow="clipboard-read; clipboard-write" hidden></iframe>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <p>
+      <span data-i18n="dashboard.footerPrefix">LAN edition · HTTP port 80 only · Status refresh every </span>
+      <span id="interval">{{STATUS_INTERVAL}}</span>
+      <span data-i18n="dashboard.footerSuffix"> ms</span>
+    </p>
+  </footer>
+
+  <script>
+    window.CLOUDHOST = {
+      csrf: "{{CSRF}}",
+      interval: "{{STATUS_INTERVAL}}",
+      ttyd: "{{TTYD_ENABLED}}"
+    };
+  </script>
+  <script src="/static/app.js?v={{VERSION}}&ui=39"></script>
+  <script src="/static/peanut.js?v={{VERSION}}&ui=39"></script>
+</body>
+</html>

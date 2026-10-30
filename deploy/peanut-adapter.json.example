@@ -1,0 +1,10 @@
+{
+  "sdk_sha256": "562202abbda41ff5400e6b07b240ff9df1fb56eb3ff4c57d938bee0e914026f0",
+  "evidence": "",
+  "rpc_isolated": false,
+  "binding_verified": false,
+  "unbinding_verified": false,
+  "ingress_verified": false,
+  "expires_mode": "unverified",
+  "image_hosts": []
+}

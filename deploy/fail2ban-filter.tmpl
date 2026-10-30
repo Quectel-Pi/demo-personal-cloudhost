@@ -1,0 +1,15 @@
+# fail2ban 过滤器：解析 Caddy JSON 访问日志中的登录失败（设计文档 11.1 / A4）
+# 安装到 /etc/fail2ban/filter.d/cloudhost-caddy.conf
+#
+# Caddy JSON 访问日志的字段顺序为：
+#   {"level":"info","ts":"...","logger":"http.log.access.log0","msg":"handled request",
+#    "request":{"remote_ip":"192.168.1.23","remote_port":"51234","client_ip":"192.168.1.23",
+#    ... "uri":"/auth/login", ...},"status":401,...}
+# 因此按 remote_ip → uri → status 的顺序做非贪婪匹配。
+[Definition]
+
+failregex = ^.*"remote_ip":"<HOST>","remote_port":"\d+".*"uri":"/auth/login".*"status":(?:401|429).*$
+
+ignoreregex =
+
+datepattern = "ts":"%%Y-%%m-%%dT%%H:%%M:%%S

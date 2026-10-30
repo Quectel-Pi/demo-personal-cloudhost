@@ -1,0 +1,29 @@
+# File Browser 文件服务（设计文档 5.3 / F3）
+# 只监听 127.0.0.1，由 Caddy 反代到 /files，baseurl=/files。
+[Unit]
+Description=CloudHost File Browser (127.0.0.1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{RUN_USER}}
+Group={{RUN_USER}}
+WorkingDirectory={{FILES_ROOT}}
+Environment=CLOUDHOST_CONFIG=/etc/cloudhost/config.yaml
+Environment=FILEBROWSER_CONFIG=/etc/cloudhost/filebrowser.json
+ExecStart=/opt/cloudhost/bin/filebrowser --config /etc/cloudhost/filebrowser.json
+Restart=on-failure
+RestartSec=3
+StartLimitBurst=5
+# 文档 16.1：File Browser 常驻内存 ≤ 50MB，这里留少量余量避免被 OOM 杀掉
+MemoryHigh=50M
+MemoryMax=64M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths={{FILES_ROOT}} /var/lib/cloudhost/filebrowser /var/log/cloudhost
+
+[Install]
+WantedBy=multi-user.target

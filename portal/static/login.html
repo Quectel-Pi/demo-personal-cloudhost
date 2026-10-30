@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title data-i18n="login.pageTitle">Sign in · Pi M2 Personal Cloud</title>
+  <script src="/static/theme-boot.js?v={{VERSION}}&amp;ui=36"></script>
+  <script src="/static/i18n.js?v={{VERSION}}&amp;ui=36"></script>
+  <link rel="stylesheet" href="/static/styles.css?v={{VERSION}}&amp;ui=36" />
+  <link rel="stylesheet" href="/static/themes.css?v={{VERSION}}&amp;ui=37" />
+  <script src="/static/theme.js?v={{VERSION}}&amp;ui=36" defer></script>
+</head>
+<body class="login-body">
+  <main class="login-shell" role="main">
+    <section class="login-story" aria-labelledby="login-story-title">
+      <p class="eyebrow">QUECTEL · PI M2</p>
+      <h2 id="login-story-title" data-i18n="experience.headline">One board. Your personal cloud.</h2>
+      <p class="story-copy" data-i18n="experience.intro">Manage files, host a website and run commands in your own real workspace.</p>
+      <div class="node-map" aria-hidden="true">
+        <span class="node-core">Pi M2<small>PERSONAL CLOUD</small></span>
+        <div class="node-branches"><span>FILES</span><span>WEB</span><span>SHELL</span></div>
+      </div>
+      <p class="diagram-caption" data-i18n="experience.diagram">Concept diagram · not live device status</p>
+      <p class="boundary" data-i18n="experience.boundary">HTTP only. Use a trusted local network; this connection is not encrypted.</p>
+    </section>
+    <section class="login-card" aria-labelledby="login-title" data-auth-mode="{{AUTH_MODE}}" data-auth-fallback="{{AUTH_FALLBACK}}">
+    <header class="brand">
+      <div>
+        <h1 id="login-title" data-i18n="login.brand">Personal Cloud</h1>
+        <p class="brand-sub" data-i18n="login.brandSub">Quectel Pi M2</p>
+      </div>
+    </header>
+
+    <div class="theme-control" data-theme-control>
+      <button class="btn btn-outline theme-toggle" id="theme-toggle" type="button" aria-controls="theme-panel" aria-expanded="false" hidden>Theme</button>
+    </div>
+    <div class="language-controls" role="group" aria-label="Language" data-i18n-aria-label="common.languageGroup">
+      <button class="btn btn-ghost btn-sm" type="button" data-language="en"
+              data-i18n-aria-label="common.languageEnglish">EN</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-language="zh"
+              data-i18n-aria-label="common.languageChinese">中文</button>
+    </div>
+    <p class="language-status" data-i18n-status role="status" aria-live="polite" hidden></p>
+    <p class="theme-status" data-theme-status role="status" aria-live="polite" data-i18n="theme.unavailable">Theme switching is unavailable. The basic page remains usable.</p>
+
+    <p class="hint" id="auth-hint">{{AUTH_HINT}}</p>
+
+    <form id="login-form" class="login-form" novalidate>
+      <label for="username" data-i18n="login.username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username"
+             value="{{LOGIN_USER}}" aria-describedby="auth-hint login-error" required spellcheck="false" />
+
+      <label for="password" data-i18n="login.password">Password</label>
+      <input id="password" name="password" type="password"
+             autocomplete="current-password" aria-describedby="auth-hint login-error" required />
+
+      <p id="login-error" class="form-error" role="alert" hidden></p>
+
+      <button id="login-submit" type="submit" class="btn btn-primary" data-i18n="login.submit">Sign in</button>
+    </form>
+
+    <footer class="login-foot">
+      <p data-i18n="login.footNetwork">Local network access only. Password sign-in is protected by an attempt limit.</p>
+      <p data-i18n="login.footSsh">SSH allows key-based sign-in only. Use SSH in the top bar after signing in to view and copy the full command.</p>
+    </footer>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var i18n = window.CloudhostI18n;
+      var form = document.getElementById("login-form");
+      var errorBox = document.getElementById("login-error");
+      var submit = document.getElementById("login-submit");
+      var redirect = "{{REDIRECT}}";
+      var currentError = null;
+      var isSubmitting = false;
+
+      function renderState() {
+        if (currentError) {
+          errorBox.textContent = i18n.t(currentError.key, currentError.params);
+          errorBox.hidden = false;
+        }
+        submit.textContent = i18n.t(isSubmitting ? "login.submitting" : "login.submit");
+      }
+
+      function showError(key, params) {
+        currentError = { key: key, params: params || {} };
+        renderState();
+      }
+
+      function readCsrfCookie() {
+        var match = document.cookie.match(/(?:^|;\s*)__Host-ch_csrf=([^;]+)/) ||
+          document.cookie.match(/(?:^|;\s*)ch_csrf=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : "";
+      }
+
+      window.addEventListener("cloudhost:languagechange", renderState);
+
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        errorBox.hidden = true;
+        currentError = null;
+
+        var username = document.getElementById("username").value.trim();
+        var password = document.getElementById("password").value;
+        if (!username || !password) {
+          showError("login.error.required");
+          return;
+        }
+
+        isSubmitting = true;
+        submit.disabled = true;
+        renderState();
+        try {
+          var body = new URLSearchParams();
+          body.set("username", username);
+          body.set("password", password);
+
+          var headers = { "Content-Type": "application/x-www-form-urlencoded" };
+          var csrf = readCsrfCookie();
+          if (csrf) { headers["X-CSRF-Token"] = csrf; }
+
+          var response = await fetch("/auth/login", {
+            method: "POST",
+            headers: headers,
+            body: body.toString(),
+            credentials: "same-origin"
+          });
+
+          if (response.status === 204) {
+            window.location.replace(redirect || "/");
+            return;
+          }
+
+          var payload = null;
+          try { payload = await response.json(); } catch (e) { payload = null; }
+          var code = payload && payload.error ? payload.error.code : "";
+          if (response.status === 429 || code === "E1005") {
+            var retry = response.headers.get("Retry-After");
+            var seconds = retry && /^\d+$/.test(retry) ? retry : "";
+            showError(seconds ? "login.error.rateLimit" : "login.error.rateLimitLater",
+              seconds ? { seconds: seconds } : {});
+          } else if (response.status === 401) {
+            showError("login.error.credentials");
+          } else {
+            showError("login.error.failure", { code: code || response.status });
+          }
+        } catch (err) {
+          showError("login.error.network");
+        } finally {
+          isSubmitting = false;
+          submit.disabled = false;
+          renderState();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# 门户运行依赖（设计文档 13 章技术选型）
+# 安装：/opt/cloudhost/venv/bin/pip install -r requirements.txt
+fastapi>=0.110,<0.116
+uvicorn[standard]>=0.29,<0.35
+websockets>=12,<16
+pyyaml>=6.0,<7.0
+psutil>=5.9,<7.0
+argon2-cffi>=23.1,<26.0
+python-multipart>=0.0.9,<0.1

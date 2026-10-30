@@ -1,0 +1,103 @@
+# 个人云主机 · Caddy 唯一入口（设计文档 5.2 / 5.4 / F7）
+# v1.0 只监听 HTTP，不启用 TLS（文档第 6 章）。
+# 由 tools/render_config.py 渲染：双花括号标记为占位符，结果写入 /etc/caddy/Caddyfile。
+#
+# 使用 route 而非 handle：route 关闭 Caddy 的指令重排，按书写顺序求值，
+# 保证 /files、/term、/site 不会被兜底规则抢先匹配。
+
+{
+	admin off
+	# v1.0 明确只用 HTTP，禁止 Caddy 自动尝试签发证书
+	auto_https off
+	# 说明：persist_config 是 Caddy 2.7+ 才支持的全局选项，Debian 13 仓库里
+	# 是 2.6.2，写了会直接报 unrecognized global option；admin off 已足够。
+	log default {
+		output file /var/log/cloudhost/caddy-access.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+		format json
+	}
+}
+
+{{SITE_ADDRESS}} {
+{{GATEWAY_BIND}}
+	route {
+{{GATEWAY_CONTEXT}}
+{{GATEWAY_POLICY}}
+		encode gzip zstd
+
+		header {
+			# v1.0 不启用 HSTS（文档 11.2）
+			X-Content-Type-Options nosniff
+			X-Frame-Options SAMEORIGIN
+			Referrer-Policy same-origin
+			-Server
+		}
+
+		# Internal forward_auth subrequests bypass this external route.
+		@verify path /auth/verify /auth/ingress
+		respond @verify "Forbidden" 403
+
+		# —— 登录 / 登出 / 登录页 / 健康检查：公开 —— #
+		@public path /auth/login /auth/logout /login /api/healthz
+		reverse_proxy @public 127.0.0.1:{{PORTAL_PORT}}
+
+		# —— 门户静态资源（CSS / JS，登录页也需要） —— #
+		@static path /static/*
+		reverse_proxy @static 127.0.0.1:{{PORTAL_PORT}}
+
+		# —— 门户 API（门户内部自行校验会话） —— #
+		@api path /api/*
+		reverse_proxy @api 127.0.0.1:{{PORTAL_PORT}}
+
+		# —— 无尾斜杠的入口统一补斜杠 —— #
+		# Caddy 的 `path /files/*` 只匹配 /files/ 与子路径，不匹配 /files；
+		# 缺这一步时 /files、/site、/term 会落到兜底门户，返回
+		# `{"detail":"Not Found"}`（FastAPI 默认 404），看起来就像服务没起来。
+		@bare_files path /files
+		redir @bare_files /files/ 308
+		@bare_site path /site
+		redir @bare_site /site/ 308
+		@bare_term path /term
+		redir @bare_term /term/ 308
+
+{{DOTFILE_HANDLER}}
+
+		# —— 文件服务：forward_auth 统一网关鉴权（验收 A4 依赖此机制） —— #
+		# File Browser 以 baseurl=/files 运行，因此保留 /files 前缀，用 handle 而非 handle_path
+		@files path /files/*
+		handle @files {
+			# Branding URLs are fixed by the official client. Revalidate on upgrades.
+			@files_branding path /files/static/custom.css /files/static/img/logo.svg
+			header @files_branding {
+				Cache-Control "no-cache"
+				defer
+			}
+			forward_auth 127.0.0.1:{{PORTAL_PORT}} {
+				uri /auth/verify
+				copy_headers X-Auth-User X-Auth-Csrf
+				# 401 = 未登录（E1004），403 = 来源被拒（E1003）。
+				# 两者都要重定向到登录页，否则会把门户的 JSON 错误直接吐给浏览器。
+				@error status 401 403
+				handle_response @error {
+					redir * /login?redirect={http.request.uri} 302
+				}
+			}
+			# File Browser 未启动时 Caddy 返回 502；门户前端的 probe 检测到
+			# 5xx 会在内嵌区域上方给出可读提示，这里不引入 handle_response，
+			# 以免依赖 Caddy ≥ 2.5 而让板端 validate 直接失败。
+			reverse_proxy 127.0.0.1:{{FILEBROWSER_PORT}}
+		}
+
+{{TERM_HANDLER}}
+
+		# —— 静态站点：/site/* → site_dir（handle_path 自动剥掉 /site 前缀） —— #
+{{SITE_HANDLER}}
+
+		# —— 兜底：门户首页（未登录由 portal 渲染登录页） —— #
+		reverse_proxy 127.0.0.1:{{PORTAL_PORT}}
+	}
+
+{{ACCESS_LOG}}
+}

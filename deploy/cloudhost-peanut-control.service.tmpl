@@ -1,0 +1,30 @@
+[Unit]
+Description=CloudHost fixed PHTunnel controller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group={{RUN_USER}}
+WorkingDirectory=/opt/cloudhost/portal
+Environment=CLOUDHOST_PORTAL_USER={{RUN_USER}}
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/cloudhost/venv/bin/python -m app.peanut_control
+RuntimeDirectory=cloudhost-peanut
+RuntimeDirectoryMode=0750
+RuntimeDirectoryPreserve=yes
+UMask=0077
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/cloudhost-peanut-control /run/cloudhost-peanut
+MemoryMax=128M
+TasksMax=64
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target
